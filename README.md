@@ -79,6 +79,30 @@ python3 scripts/download_datasets.py --model base_laya
 
 ## Training on Apple Silicon Metal (MPS)
 
+### Reinforcement Learning with Calibrated Decisions (RLCD)
+
+Rather than generating tokens autoregressively, Laya treats browser navigation as calibrated probability distributions over discrete action vocabularies and candidate element indices. In each training step, the engine executes a policy gradient update using strictly proper scoring rules (Spherical scoring $w_{\text{sph}}=0.75$ and Ranked Probability Scoring $w_{\text{rps}}=1.0$) paired with soft cross-entropy guidance:
+
+```python
+# 1. Sample G noisy logit distributions with zero-mean projection
+eps = torch.randn((GROUP_SIZE,) + logits.shape, device=device) * sigma * mask
+eps = (eps - eps.sum(-1, keepdim=True) / k) * mask
+z = logits.detach().unsqueeze(0) + eps
+q = torch.softmax(z.masked_fill(~mask, -1e4), -1)
+
+# 2. Evaluate proper scoring reward (w_sph=0.75, w_rps=1.0)
+with torch.no_grad():
+    r = proper_reward(q, target.unsqueeze(0), batch["qtype"].to(device), mask, w_sph=0.75, w_rps=1.0)
+    adv = (r - r.mean(0, keepdim=True)) / (r.std() + 1e-6)
+
+# 3. Policy gradient loss + soft cross-entropy guidance
+logp = -(((z - logits.unsqueeze(0)) ** 2) * mask).sum(-1) / (2 * sigma**2)
+loss_rl = -(adv * logp).mean()
+loss_ce = -(target * torch.log_softmax(logits.masked_fill(~mask, -1e4), -1)).sum(-1).mean()
+loss = (loss_rl + 1.0 * loss_ce) / GRAD_ACCUM
+loss.backward()
+```
+
 ### The Metal Unified Memory Leak & Fix
 
 During initial training runs on Apple Silicon unified memory, PyTorch RSS memory bloated to **32.6 GB**, forcing **21.5 GB into disk swap** and slowing throughput by 10×. The PyTorch Metal Performance Shaders (MPS) allocator retained intermediate computation graph allocations across gradient accumulation boundaries.
