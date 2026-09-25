@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large binary weights (download via huggingface_hub or train locally)
+*.safetensors
+*.bin
+*.pt.large
+
+# Mac OS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment and secrets
+.env
+*.env
+.venv/
+venv/
+ENV/
+env/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Training checkpoints & scratch logs
+*.log
+scratch/
+checkpoints/
+runs/
