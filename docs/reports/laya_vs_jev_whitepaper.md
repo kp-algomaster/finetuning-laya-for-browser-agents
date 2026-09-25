@@ -49,6 +49,29 @@ Deploying massive frontier models or commercial cloud APIs like TypeSafe Jev int
 
 ## 2. Evaluation Setup & The Anatomy of a Browser 'Decision'
 
+All benchmark test cases, model checkpoints, and evaluation scripts are open-source and directly inspectable in the GitHub repository: [`kp-algomaster/finetuning-laya-for-browser-agents`](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents). You can clone the repository to inspect the exact files referenced below:
+
+```bash
+git clone https://github.com/kp-algomaster/finetuning-laya-for-browser-agents.git
+cd finetuning-laya-for-browser-agents
+```
+
+The repository organizes the benchmark assets and models as follows:
+
+```
+finetuning-laya-for-browser-agents/
+├── data/
+│   ├── browser_test_cases.jsonl       # 70 benchmark scenarios (244 discrete decisions)
+│   ├── browser_train_items.pt         # 14,076 RLCD tokenized training sequences
+│   └── browser_calib_items.pt         # Held-out split for Platt temperature calibration
+├── scripts/
+│   ├── eval_jev_vs_laya.py            # Side-by-side benchmark runner vs TypeSafe Jev API
+│   ├── train_laya_mac.py              # Apple Silicon Metal (MPS) fine-tuning engine
+│   └── download_datasets.py           # Automated Hugging Face dataset fetch utility
+└── models/laya-browser-agent/
+    └── checkpoint_latest/             # Fine-tuned 149M ModernBERT weights & tokenizer
+```
+
 ### Compact Evaluation Setup
 > **Evaluation Setup & Hyperparameters**:
 > - **Benchmark Test Suite**: 70 real-world browser interaction scenarios ([`data/browser_test_cases.jsonl`](file:///Users/kp/Github/BroPilot/data/browser_test_cases.jsonl)) spanning flight booking, search engines, Wikipedia entity lookups, and developer consoles.
