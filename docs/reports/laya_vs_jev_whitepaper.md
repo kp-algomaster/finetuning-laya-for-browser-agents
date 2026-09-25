@@ -2,7 +2,7 @@
 
 **Date**: September 25, 2026  
 **Target Publication**: Technical Deep-Dive & Engineering Benchmark  
-**Artifacts & Code**: [BroPilot GitHub Repository](https://github.com/BroPilot/BroPilot)
+**Artifacts & Code**: [GitHub Repository (kp-algomaster/finetuning-laya-for-browser-agents)](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents)
 
 ---
 
@@ -183,6 +183,58 @@ graph TD
     end
 ```
 
+### Reinforcement Learning with Calibrated Decisions (RLCD)
+
+Rather than generating text tokens autoregressively, Laya treats browser navigation as calibrated probability distributions over discrete action vocabularies and candidate element indices. In each training step, the engine executes a policy gradient update using strictly proper scoring rules (Spherical scoring $w_{\text{sph}}=0.75$ and Ranked Probability Scoring $w_{\text{rps}}=1.0$) paired with soft cross-entropy guidance:
+
+```python
+# Forward pass through ModernBERT backbone + multi-task decision heads
+logits, act = model(
+    batch["input_ids"].to(device),
+    batch["attention_mask"].to(device),
+    batch["marker_pos"].to(device),
+    batch["marker_mask"].to(device),
+    batch["qtype"].to(device),
+)
+
+# 1. Sample G noisy logit distributions with zero-mean projection
+eps = torch.randn((GROUP_SIZE,) + logits.shape, device=device) * sigma * mask
+eps = (eps - eps.sum(-1, keepdim=True) / k) * mask
+z = logits.detach().unsqueeze(0) + eps
+q = torch.softmax(z.masked_fill(~mask, -1e4), -1)
+
+# 2. Evaluate proper scoring reward (w_sph=0.75, w_rps=1.0)
+with torch.no_grad():
+    r = proper_reward(q, target.unsqueeze(0), batch["qtype"].to(device), mask, w_sph=0.75, w_rps=1.0)
+    adv = (r - r.mean(0, keepdim=True)) / (r.std() + 1e-6)
+
+# 3. Policy gradient loss + soft cross-entropy guidance
+logp = -(((z - logits.unsqueeze(0)) ** 2) * mask).sum(-1) / (2 * sigma**2)
+loss_rl = -(adv * logp).mean()
+loss_ce = -(target * torch.log_softmax(logits.masked_fill(~mask, -1e4), -1)).sum(-1).mean()
+loss = (loss_rl + 1.0 * loss_ce) / GRAD_ACCUM
+loss.backward()
+```
+
+### Post-Training Platt Temperature Scaling
+
+To ensure predicted confidence values strictly match empirical accuracy across deciles, softmax temperatures $\tau$ are fitted via L-BFGS over a held-out calibration split (minimizing negative log likelihood):
+
+```python
+def fit_one_temp(sel):
+    log_t = torch.zeros(1, requires_grad=True)
+    opt = torch.optim.LBFGS([log_t], lr=0.1, max_iter=100)
+
+    def closure():
+        opt.zero_grad()
+        loss = -(T * torch.log_softmax(Z / log_t.exp(), -1)).sum(-1).mean()
+        loss.backward()
+        return loss
+
+    opt.step(closure)
+    return float(torch.clamp(log_t.exp(), 0.1, 10.0).item())
+```
+
 **The Fix**: In [`scripts/train_laya_mac.py`](file:///Users/kp/Github/BroPilot/scripts/train_laya_mac.py), explicit Metal allocator cache purges were placed at gradient accumulation boundaries:
 
 ```python
@@ -203,14 +255,38 @@ System RAM usage immediately stabilized at **~263 MB**, eliminating swap thrashi
 
 ## 6. Reproducibility & Quick Start
 
-All benchmark cases, model checkpoints, and evaluation code are available in the [BroPilot GitHub Repository](https://github.com/BroPilot/BroPilot). Full API integration guides and dataset download inventories are documented in the repository [docs/](file:///Users/kp/Github/BroPilot/docs).
+All dataset download utilities, training engines, model checkpoints, and evaluation code are available in the [kp-algomaster/finetuning-laya-for-browser-agents GitHub Repository](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents).
 
-To reproduce the 70-case side-by-side benchmark locally:
-
+### 1. Clone Repository & Install Dependencies
 ```bash
-# Clone the repository and run the side-by-side evaluation
-git clone https://github.com/BroPilot/BroPilot.git && cd BroPilot
+git clone https://github.com/kp-algomaster/finetuning-laya-for-browser-agents.git
+cd finetuning-laya-for-browser-agents
+pip install -r requirements.txt
+```
 
+### 2. Download Dataset Splits & Base Checkpoints
+```bash
+# Downloads Mind2Web, Laya-Browser, and base weights from Hugging Face
+python3 scripts/download_datasets.py
+```
+
+### 3. Launch Local Fine-Tuning on Apple Silicon (MPS)
+```bash
+python3 scripts/train_laya_mac.py \
+    --model-dir models/convaiinnovations-laya \
+    --train-items data/browser_train_items.pt \
+    --calib-items data/browser_calib_items.pt \
+    --output-dir models/laya-browser-agent \
+    --epochs 3 \
+    --micro-batch 4 \
+    --grad-accum 4 \
+    --device mps
+```
+
+> **Cloud Multi-GPU Clusters**: Run distributed DDP training via `torchrun --standalone --nproc_per_node=2 scripts/train_laya_browser_ddp.py` or use the 1-click [Kaggle Dual-T4 notebook](notebooks/laya_finetune_browser_tasks_2xT4_kaggle.ipynb).
+
+### 4. Reproduce the 70-Case Side-by-Side Benchmark
+```bash
 python3 scripts/eval_jev_vs_laya.py \
     --model-dir models/laya-browser-agent/checkpoint_latest \
     --test-file data/browser_test_cases.jsonl \
@@ -271,10 +347,10 @@ Specialized, lightweight decision models fine-tuned on consumer Apple Silicon ha
 4. **TypeSafe Jev System One**:
    - Console & Keys: [TypeSafe AI Console](https://console.typesafe.ai)
    - Documentation & API: [TypeSafe AI Platform](https://typesafe.ai)
-5. **BroPilot Open-Source Repository**:
-   - Repository & Source Code: [GitHub BroPilot/BroPilot](https://github.com/BroPilot/BroPilot)
-   - Evaluation Benchmark Script: [`scripts/eval_jev_vs_laya.py`](https://github.com/BroPilot/BroPilot/blob/main/scripts/eval_jev_vs_laya.py)
-   - Training Visualizer Server: [`scripts/training_visualizer_server.py`](https://github.com/BroPilot/BroPilot/blob/main/scripts/training_visualizer_server.py)
+5. **Laya Browser Agent Fine-Tuning Open-Source Repository**:
+   - Repository & Source Code: [GitHub kp-algomaster/finetuning-laya-for-browser-agents](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents)
+   - Evaluation Benchmark Script: [`scripts/eval_jev_vs_laya.py`](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents/blob/main/scripts/eval_jev_vs_laya.py)
+   - Training Visualizer Server: [`scripts/training_visualizer_server.py`](https://github.com/kp-algomaster/finetuning-laya-for-browser-agents/blob/main/scripts/training_visualizer_server.py)
 6. **Calibration & Probability Scoring Literature**:
    - Brier, Glenn W. (1950). *Verification of forecasts expressed in terms of probability*. Monthly Weather Review, 78(1), 1-3. [NOAA Direct PDF](https://www.weather.gov/media/mdl/Brier_Score_1950.pdf)
    - Guo, Chuan, et al. (2017). *On Calibration of Modern Neural Networks*. ICML 2017. [arXiv:1706.04599](https://arxiv.org/abs/1706.04599)
