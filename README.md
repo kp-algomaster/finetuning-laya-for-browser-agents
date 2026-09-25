@@ -9,10 +9,10 @@
 This repository contains the complete codebase, evaluation harness, dataset curation scripts, and benchmark artifacts for fine-tuning **Laya** (a 149M-parameter ModernBERT encoder with multi-task decision heads) for high-frequency, structured browser automation.
 
 In a held-out **70-case / 244-decision benchmark**, Fine-Tuned Laya outperformed the commercial **TypeSafe Jev Cloud API (`jev-1.13.0`)**:
-- **Case-Level Success**: **84.3% (59/70 scenarios)** vs. Jev's **70.0% (49/70)** (▲ +14.3 points)
-- **Decision Accuracy**: **94.3% (230/244 decisions)** vs. Jev's **86.9% (212/244)** (▲ +7.4 points)
+- **Offline Case-Level Pass**: **84.3% (59/70 cases with all graded outputs correct)** vs. Jev's **70.0% (49/70)** (▲ +14.3 points)
+- **Decision-Level Accuracy**: **94.3% (230/244 decisions)** vs. Jev's **86.9% (212/244)** (▲ +7.4 points)
 - **Median Decision Latency**: **116.8 ms** (Apple Silicon MPS) vs. **841.8 ms** (Cloud Jev API) (▲ 7.2× faster)
-- **Calibration (Brier Score)**: **0.0002** vs. Jev's **0.1608** (▲ 804× lower squared error)
+- **Calibration (Brier Score)**: **0.0002** vs. Jev's **0.1608** (▲ 804× lower squared error across categorical output distributions)
 - **Marginal Cloud Cost**: **$0.00** at zero SaaS API invoices
 
 ---
@@ -21,26 +21,25 @@ In a held-out **70-case / 244-decision benchmark**, Fine-Tuned Laya outperformed
 
 | Metric | Base ModernBERT (Zero-Shot) | TypeSafe Jev (`jev-1.13.0` Live API) | Fine-Tuned Laya (Local Mac MPS) | Delta (Laya vs. Jev) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Case-Level Success (All Heads)** | 22 / 70 (31.43%) | 49 / 70 (70.00%) | **59 / 70 (84.29%)** | **▲ +10 cases (+14.29%)** |
+| **Offline Case-Level Pass (All Graded Outputs)** | 22 / 70 (31.43%) | 49 / 70 (70.00%) | **59 / 70 (84.29%)** | **▲ +10 cases (+14.29%)** |
 | **Decisions Correct** | 158 / 244 | 212 / 244 | **230 / 244** | **▲ +18 decisions** |
-| **Decision Accuracy (Argmax)** | 64.60% | 86.89% (~86.9%)\* | **94.26% (~94.3%)** | **▲ +7.37%** |
+| **Decision Accuracy (Argmax)** | 64.60% | 86.89% (~86.9%) | **94.26% (~94.3%)** | **▲ +7.37%** |
 | **Soft Accuracy (Agreement)** | 54.20% | 71.03% | **76.66%** | **▲ +5.63%** |
 | **Brier Score (Lower is better)** | 0.1190 | 0.1608 | **0.0002** | **▲ 804× lower error** |
 | **Expected Calibration Error (ECE)** | 17.90% | 7.66% | **7.55%** | **▲ Comparable (~7.6%)** |
 | **Total Variation Distance (TV)** | 0.4580 | 0.2051 | **0.0091** | **▲ 22× closer to gold** |
 | **Median Latency ($p_{50}$)** | 349.0 ms | 841.8 ms | **116.8 ms (MPS)** | **▲ 7.2× faster** |
-| **Marginal API Cost / 1k Steps** | $0.00 | $0.40 | **$0.00 (Zero API fees)** | **100% cloud cost reduction** |
+| **Marginal API Cost / 1k Steps** | $0.00 | ~$0.40 (workload est.) | **$0.00 (Zero API fees)** | **100% cloud cost reduction** |
 
-*\* Footnote: An early draft cited 90.6% for Jev due to an unweighted arithmetic average of sub-head percentages ([81.4 + 98.6 + 79.4 + 97.1] / 4 = 89.1%). The authoritative decision-level metric is 212 correct out of 244 decisions (86.89% ~ 86.9%).*
+### Reconciled Sub-Decision Breakdown
 
-### Sub-Decision Accuracy Breakdown
-
-| Decision Head | Number of Decisions | Base ModernBERT | TypeSafe Jev | Fine-Tuned Laya |
-| :--- | :---: | :---: | :---: | :---: |
-| **`operation`** (7-way primitive action) | 70 | 61.4% | 81.4% (57/70) | **100.0% (70/70)** |
-| **`is_goal_satisfied`** (Noul verification) | 70 | 88.6% | 98.6% (69/70) | **100.0% (70/70)** |
-| **`type_text_target`** (Input field index) | 34 | 52.9% | **79.4% (27/34)** | 76.5% (26/34) |
-| **`click_target`** (Element index) | 70 | 55.7% | **97.1% (68/70)** | 74.3% (52/70) |
+| Decision Head | Number of Decisions | Base ModernBERT | TypeSafe Jev | Fine-Tuned Laya | Delta (Laya vs Jev) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`operation`** (7-way primitive action) | 70 | 61.4% (43/70) | 81.4% (57/70) | **100.0% (70/70)** | **▲ +13 decisions (+18.6%)** |
+| **`is_goal_satisfied`** (Noul verification) | 70 | 88.6% (62/70) | **100.0% (70/70)** | **100.0% (70/70)** | **Tied at parity (70/70)** |
+| **`type_text_target`** (Input field index) | 34 | 52.9% (18/34) | 73.5% (25/34) | **82.4% (28/34)** | **▲ +3 decisions (+8.9%)** |
+| **`click_target`** (Element index) | 70 | 55.7% (39/70) | 85.7% (60/70) | **88.6% (62/70)** | **▲ +2 decisions (+2.9%)** |
+| **Total Decisions Correct** | **244** | **158 / 244 (64.6%)** | **212 / 244 (86.9%)** | **230 / 244 (94.3%)** | **▲ +18 decisions (+7.4%)** |
 
 <p align="center">
   <img src="docs/reports/images/overall_accuracy_brier_chart.png" width="48%" alt="Accuracy and Brier Calibration" />

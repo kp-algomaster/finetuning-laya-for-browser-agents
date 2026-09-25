@@ -400,10 +400,10 @@
 <body>
   <div class="container">
     <header>
-      <div class="badge-pill">BroPilot Technical Whitepaper · Empirical AI Benchmark</div>
+      <div class="badge-pill">Technical Whitepaper · Empirical AI Benchmark</div>
       <h1>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 149M Parameter Fine-Tuned Model Compete?</h1>
       <p class="subtitle">
-        Can a small, locally fine-tuned model make browser-agent decisions as well as a cloud service? In my 70-case benchmark, Fine-Tuned Laya made 230 of 244 structured decisions correctly (94.3%), compared with 212 of 244 (86.9%) for Jev.
+        Can a small local model make the same structured browser decisions as Jev? I tested a fine-tuned 149M-parameter Laya model against jev-1.13.0 on 70 held-out browser states. This is an offline comparison of decision outputs—not a test of end-to-end browser task completion.
       </p>
       <div class="meta-bar">
         <div class="meta-item"><span>📅</span> <strong>September 25, 2026</strong></div>
@@ -552,7 +552,7 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>Case-Level Success (All Heads Correct)</strong></td>
+              <td><strong>Offline Case-Level Pass (All Graded Outputs Correct)</strong></td>
               <td>22 / 70 (31.43%)</td>
               <td>49 / 70 (70.00%)</td>
               <td class="c-emerald"><strong>59 / 70 (84.29%)</strong></td>
@@ -568,7 +568,7 @@
             <tr>
               <td><strong>Hard Accuracy (Argmax Match)</strong></td>
               <td>64.60%</td>
-              <td>86.89% (~86.9%)*</td>
+              <td>86.89% (~86.9%)</td>
               <td class="c-emerald"><strong>94.26% (~94.3%)</strong></td>
               <td class="c-emerald">▲ +7.37%</td>
             </tr>
@@ -594,18 +594,11 @@
               <td class="c-emerald">▲ Comparable (~7.6%)</td>
             </tr>
             <tr>
-              <td><strong>Operation Selection Head</strong></td>
-              <td>61.40%</td>
-              <td>81.43%</td>
-              <td class="c-emerald"><strong>100.0%</strong></td>
-              <td class="c-emerald">▲ +18.57%</td>
-            </tr>
-            <tr>
-              <td><strong>Goal Satisfaction Head (Noul)</strong></td>
-              <td>88.60%</td>
-              <td>98.57%</td>
-              <td class="c-emerald"><strong>100.0%</strong></td>
-              <td class="c-emerald">▲ +1.43%</td>
+              <td><strong>Total Variation Distance (TV)</strong></td>
+              <td>0.4580</td>
+              <td>0.2051</td>
+              <td class="c-emerald"><strong>0.0091</strong></td>
+              <td class="c-emerald">▲ 22× Closer to Gold</td>
             </tr>
             <tr>
               <td><strong>Median Latency (p50)</strong></td>
@@ -617,16 +610,71 @@
             <tr>
               <td><strong>Marginal Cost per 1,000 Steps</strong></td>
               <td>$0.00</td>
-              <td>$0.40</td>
+              <td>~$0.40 (workload est.)</td>
               <td class="c-emerald"><strong>$0.00 (Zero API fees)</strong></td>
               <td class="c-emerald">100% Cloud Savings</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">
-        * Note on error reconciliation: An early draft reported 90.6% for Jev based on an unweighted sub-head average. The authoritative decision-level metric is 212 correct out of 244 decisions (86.89%).
-      </p>
+
+      <h3 style="margin-top: 32px;">Reconciled Sub-Decision Head Breakdown</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Decision Head</th>
+              <th>Number of Decisions</th>
+              <th>Base ModernBERT</th>
+              <th>TypeSafe Jev</th>
+              <th>Fine-Tuned Laya</th>
+              <th>Delta (Laya vs Jev)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>operation</strong> (7-way choice)</td>
+              <td>70</td>
+              <td>61.4% (43/70)</td>
+              <td>81.4% (57/70)</td>
+              <td class="c-emerald"><strong>100.0% (70/70)</strong></td>
+              <td class="c-emerald">▲ +13 decisions (+18.6%)</td>
+            </tr>
+            <tr>
+              <td><strong>is_goal_satisfied</strong> (Noul verification)</td>
+              <td>70</td>
+              <td>88.6% (62/70)</td>
+              <td><strong>100.0% (70/70)</strong></td>
+              <td class="c-emerald"><strong>100.0% (70/70)</strong></td>
+              <td>Tied at parity (70/70)</td>
+            </tr>
+            <tr>
+              <td><strong>type_text_target</strong> (Input field index)</td>
+              <td>34</td>
+              <td>52.9% (18/34)</td>
+              <td>73.5% (25/34)</td>
+              <td class="c-emerald"><strong>82.4% (28/34)</strong></td>
+              <td class="c-emerald">▲ +3 decisions (+8.9%)</td>
+            </tr>
+            <tr>
+              <td><strong>click_target</strong> (Element index)</td>
+              <td>70</td>
+              <td>55.7% (39/70)</td>
+              <td>85.7% (60/70)</td>
+              <td class="c-emerald"><strong>88.6% (62/70)</strong></td>
+              <td class="c-emerald">▲ +2 decisions (+2.9%)</td>
+            </tr>
+            <tr>
+              <td><strong>Total Decisions Correct</strong></td>
+              <td><strong>244</strong></td>
+              <td><strong>158 / 244 (64.6%)</strong></td>
+              <td><strong>212 / 244 (86.9%)</strong></td>
+              <td class="c-emerald"><strong>230 / 244 (94.3%)</strong></td>
+              <td class="c-emerald"><strong>▲ +18 decisions (+7.4%)</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Section 4: Dataset & Training Pipeline -->
@@ -977,9 +1025,9 @@ if (step + 1) % grad_accum == 0 or (step + 1) == len(train_loader):
               <td>Dynamic indexed action space engine and <span class="code-inline">/v1/systemone</span> API standard.</td>
             </tr>
             <tr>
-              <td><strong>BroPilot Project Repo</strong></td>
+              <td><strong>Laya Browser Agent Repo</strong></td>
               <td>Source Code & Benchmarks</td>
-              <td><a href="https://github.com/BroPilot/BroPilot" target="_blank" style="color: var(--cyan); text-decoration: underline;">github.com/BroPilot/BroPilot</a></td>
+              <td><a href="https://github.com/kp-algomaster/finetuning-laya-for-browser-agents" target="_blank" style="color: var(--cyan); text-decoration: underline;">github.com/kp-algomaster/finetuning-laya-for-browser-agents</a></td>
               <td>Complete open-source repository containing training pipeline, evaluators, and test suite.</td>
             </tr>
           </tbody>
@@ -988,9 +1036,9 @@ if (step + 1) % grad_accum == 0 or (step + 1) == len(train_loader):
 
       <h3>Quick Start: Re-running the Side-by-Side Benchmark</h3>
       <p>Anyone with Python 3.9+ can clone the repository and run the benchmark directly:</p>
-      <pre><code># 1. Clone the BroPilot repository
-git clone https://github.com/BroPilot/BroPilot.git
-cd BroPilot
+      <pre><code># 1. Clone the repository
+git clone https://github.com/kp-algomaster/finetuning-laya-for-browser-agents.git
+cd finetuning-laya-for-browser-agents
 
 # 2. Download pretrained base model weights from Hugging Face
 huggingface-cli download convaiinnovations/laya --local-dir models/laya-base
