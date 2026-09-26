@@ -37,7 +37,7 @@ DATASETS = {
         "description": "5,244 real web tasks across 421 crawled domains, paired with Chromium DONE landing states."
     },
     "base_laya": {
-        "name": "Base Laya Foundation Checkpoint (149M ModernBERT)",
+        "name": "Base Laya Foundation Checkpoint (421M ModernBERT-large)",
         "hf_id": "convaiinnovations/laya",
         "type": "model",
         "url": "https://huggingface.co/convaiinnovations/laya",

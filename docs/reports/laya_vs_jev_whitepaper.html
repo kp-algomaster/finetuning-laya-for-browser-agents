@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 149M Parameter Fine-Tuned Model Compete?</title>
+  <title>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 421M Parameter Fine-Tuned Model Compete?</title>
   <meta name="description" content="A rigorous empirical benchmark, replication guide, and failure analysis of Base ModernBERT, TypeSafe Jev (Cloud System One API), and Fine-Tuned Laya Browser Agent on Mac Apple Silicon.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -401,9 +401,9 @@
   <div class="container">
     <header>
       <div class="badge-pill">Technical Whitepaper · Empirical AI Benchmark</div>
-      <h1>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 149M Parameter Fine-Tuned Model Compete?</h1>
+      <h1>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 421M Parameter Fine-Tuned Model Compete?</h1>
       <p class="subtitle">
-        Can a small local model make the same structured browser decisions as Jev? I tested a fine-tuned 149M-parameter Laya model against jev-1.13.0 on 70 held-out browser states. This is an offline comparison of decision outputs—not a test of end-to-end browser task completion.
+        Can a small local model make the same structured browser decisions as Jev? I tested a fine-tuned 421M-parameter Laya model against jev-1.13.0 on 70 held-out browser states. This is an offline comparison of decision outputs—not a test of end-to-end browser task completion.
       </p>
       <div class="meta-bar">
         <div class="meta-item"><span>📅</span> <strong>September 25, 2026</strong></div>
@@ -454,7 +454,7 @@
         Crucially, general-purpose LLMs suffer from <em>"human-simulation bias"</em>. When presented with web forms, cloud models often predict a redundant <span class="code-inline">CLICK</span> operation before entering text, mimicking human behavior. In programmatic browser automation (e.g., Playwright / CDP), inputs auto-focus upon typing—meaning cloud models waste critical execution steps and introduce automation failures.
       </p>
       <p>
-        In this work, I demonstrate that <strong>Fine-Tuned Laya</strong>—a 149M-parameter ModernBERT encoder equipped with multi-task decision primitives (<span class="code-inline">ChoiceHead</span> and <span class="code-inline">NoulHead</span>) trained locally on Apple Silicon Metal (MPS)—achieves <strong>94.3% overall decision accuracy</strong> (230/244 decisions correct) and <strong>84.3% case-level success</strong> (59/70 scenarios) versus TypeSafe Jev's 86.9% decisions (212/244) and 70.0% case success (49/70).
+        In this work, I demonstrate that <strong>Fine-Tuned Laya</strong>—a 421M-parameter ModernBERT-large encoder equipped with multi-task decision primitives (<span class="code-inline">ChoiceHead</span> and <span class="code-inline">NoulHead</span>) trained locally on Apple Silicon Metal (MPS)—achieves <strong>94.3% overall decision accuracy</strong> (230/244 decisions correct) and <strong>84.3% case-level success</strong> (59/70 scenarios) versus TypeSafe Jev's 86.9% decisions (212/244) and 70.0% case success (49/70).
       </p>
 
       <!-- Compact Evaluation Setup Box -->
@@ -463,7 +463,7 @@
         <ul style="margin: 10px 0 0 20px; color: #cbd5e1; font-size: 0.88rem; line-height: 1.8;">
           <li><strong>Benchmark Test Suite:</strong> 70 real-world web interaction scenarios (<span class="code-inline">data/browser_test_cases.jsonl</span>) spanning flight booking, search engines, Wikipedia lookups, and developer consoles.</li>
           <li><strong>Total Graded Decisions:</strong> Exactly <strong>244 discrete outputs</strong> across the 70 scenarios (70 operation + 70 goal satisfaction + 70 click target + 34 text target).</li>
-          <li><strong>Local Model Checkpoint:</strong> Fine-Tuned Laya (149M ModernBERT backbone with multi-task ChoiceHeads & Noul verification, <span class="code-inline">models/laya-browser-agent/checkpoint_latest</span>).</li>
+          <li><strong>Local Model Checkpoint:</strong> Fine-Tuned Laya (421M ModernBERT-large backbone with multi-task ChoiceHeads & Noul verification, <span class="code-inline">models/laya-browser-agent/checkpoint_latest</span>).</li>
           <li><strong>Cloud Baseline API:</strong> TypeSafe Jev (<span class="code-inline">jev-1.13.0</span>, live production System One API at <span class="code-inline">https://api.typesafe.ai/v1/systemone</span>).</li>
           <li><strong>Hardware & Runtime:</strong> Apple Silicon M2 Max (38 GPU cores, 64 GB unified memory) using PyTorch Metal Performance Shaders (MPS), FP16.</li>
           <li><strong>Test Date & Contamination Check:</strong> September 25, 2026. Zero benchmark test cases were included in the training split (strictly held-out validation set).</li>
@@ -1004,7 +1004,7 @@ if (step + 1) % grad_accum == 0 or (step + 1) == len(train_loader):
               <td><strong>Base Laya Foundation Model</strong></td>
               <td>ModernBERT Weights</td>
               <td><a href="https://huggingface.co/convaiinnovations/laya" target="_blank" style="color: var(--cyan); text-decoration: underline;">huggingface.co/convaiinnovations/laya</a></td>
-              <td>Pretrained ModernBERT-149M encoder weights prior to browser fine-tuning.</td>
+              <td>Pretrained ModernBERT-large (421M) encoder weights prior to browser fine-tuning.</td>
             </tr>
             <tr>
               <td><strong>Typed Decisions Benchmark</strong></td>

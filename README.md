@@ -6,7 +6,7 @@
 [![Hardware](https://img.shields.io/badge/Hardware-Apple%20Silicon%20MPS%20%7C%20CUDA%20DDP-success.svg)](#training-on-apple-silicon-metal-mps)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Model-cklxx%2Flaya--browser-yellow)](https://huggingface.co/cklxx/laya-browser)
 
-This repository contains the complete codebase, evaluation harness, dataset curation scripts, and benchmark artifacts for fine-tuning **Laya** (a 149M-parameter ModernBERT encoder with multi-task decision heads) for high-frequency, structured browser automation.
+This repository contains the complete codebase, evaluation harness, dataset curation scripts, and benchmark artifacts for fine-tuning **Laya** (a 421M-parameter ModernBERT-large encoder with multi-task decision heads) for high-frequency, structured browser automation.
 
 In a held-out **70-case / 244-decision benchmark**, Fine-Tuned Laya outperformed the commercial **TypeSafe Jev Cloud API (`jev-1.13.0`)**:
 - **Offline Case-Level Pass**: **84.3% (59/70 cases with all graded outputs correct)** vs. Jev's **70.0% (49/70)** (▲ +14.3 points)

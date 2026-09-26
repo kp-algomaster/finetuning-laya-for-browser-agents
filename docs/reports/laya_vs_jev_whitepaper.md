@@ -1,4 +1,4 @@
-# Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 149M Parameter Fine-Tuned Model Compete?
+# Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 421M Parameter Fine-Tuned Model Compete?
 
 **Date**: September 25, 2026  
 **Target Publication**: Technical Deep-Dive & Engineering Benchmark  
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-Can a small local model make the same structured browser decisions as Jev? I tested a fine-tuned 149M-parameter Laya model against jev-1.13.0 on 70 held-out browser states. This is an offline comparison of decision outputs—not a test of end-to-end browser task completion.
+Can a small local model make the same structured browser decisions as Jev? I tested a fine-tuned 421M-parameter Laya model against jev-1.13.0 on 70 held-out browser states. This is an offline comparison of decision outputs—not a test of end-to-end browser task completion.
 
 In this benchmark, Fine-Tuned Laya made 230 of 244 structured decisions correctly (94.3%) and passed 59 of 70 offline cases with all graded outputs correct (84.3%), compared with 212 of 244 decisions (86.9%) and 49 of 70 cases (70.0%) for TypeSafe Jev. On local Apple Silicon MPS, Laya's median decision latency was 116.8 ms at $0 marginal cloud API charges, versus 841.8 ms for the cloud baseline.
 
@@ -83,14 +83,14 @@ finetuning-laya-for-browser-agents/
 │   ├── train_laya_mac.py              # Apple Silicon Metal (MPS) fine-tuning engine
 │   └── download_datasets.py           # Automated Hugging Face dataset fetch utility
 └── models/laya-browser-agent/
-    └── checkpoint_latest/             # Fine-tuned 149M ModernBERT weights & tokenizer
+    └── checkpoint_latest/             # Fine-tuned 421M ModernBERT-large weights & tokenizer
 ```
 
 ### Compact Evaluation Setup
 > **Evaluation Setup & Hyperparameters**:
 > - **Benchmark Test Suite**: 70 real-world browser interaction scenarios ([`data/browser_test_cases.jsonl`](file:///Users/kp/Github/BroPilot/data/browser_test_cases.jsonl)) spanning flight booking, search engines, Wikipedia entity lookups, and developer consoles.
 > - **Total Graded Decisions**: Exactly 244 discrete outputs evaluated across the 70 scenarios.
-> - **Local Model Checkpoint**: Fine-Tuned Laya (149M ModernBERT backbone with multi-task ChoiceHeads & Noul verification, checkpoint: [`models/laya-browser-agent/checkpoint_latest`](file:///Users/kp/Github/BroPilot/models/laya-browser-agent)).
+> - **Local Model Checkpoint**: Fine-Tuned Laya (421M ModernBERT-large backbone with multi-task ChoiceHeads & Noul verification, checkpoint: [`models/laya-browser-agent/checkpoint_latest`](file:///Users/kp/Github/BroPilot/models/laya-browser-agent)).
 > - **Cloud Baseline API**: TypeSafe Jev (`jev-1.13.0`, live commercial System One API endpoint at `https://api.typesafe.ai/v1/systemone`).
 > - **Hardware & Runtime**: Apple Silicon M2 Max (38 GPU cores, 64 GB unified memory) using PyTorch Metal Performance Shaders (MPS), FP16 mixed precision.
 > - **Test Isolation & Contamination Check**: Tested September 25, 2026. All 70 benchmark test cases are strictly held out, with no overlapping web pages, domains, or DOM templates in the training split.
@@ -275,7 +275,7 @@ python3 scripts/eval_jev_vs_laya.py \
 
 While these results demonstrate the efficacy of lightweight local models on offline decision tasks, several engineering caveats apply:
 - **Offline Benchmark Scope**: The 70-case benchmark evaluated single-step decision heads on saved web states rather than continuous, multi-minute autonomous browsing sessions.
-- **World Knowledge Gaps**: At 149M parameters, Laya lacks the encyclopedic world knowledge required for nuanced entity resolution without cloud fallback.
+- **World Knowledge Gaps**: At 421M parameters, Laya lacks the encyclopedic world knowledge required for nuanced entity resolution without cloud fallback.
 - **Cascade Gating Caveat**: A confidence cutoff (e.g. 0.40) is not inherently safe for 7-way choices without empirical risk-coverage calibration. Notably, the upstream Laya guide reported mixed results in early confidence-gated escalation trials, highlighting that thresholding must be tuned carefully on validation data.
 
 ### Architectural Hypothesis: Confidence-Gated Edge–Cloud Cascade
