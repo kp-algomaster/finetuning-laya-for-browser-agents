@@ -19,7 +19,7 @@ In a held-out **70-case / 244-decision benchmark**, Fine-Tuned Laya outperformed
 
 ## Benchmark Highlights & Verified Results
 
-| Metric | Base ModernBERT (Zero-Shot) | TypeSafe Jev (`jev-1.13.0` Live API) | Fine-Tuned Laya (Local Mac MPS) | Delta (Laya vs. Jev) |
+| Metric | Base Laya (Zero-Shot) | TypeSafe Jev (`jev-1.13.0` Live API) | Fine-Tuned Laya (Local Mac MPS) | Delta (Laya vs. Jev) |
 | :--- | :---: | :---: | :---: | :---: |
 | **Offline Case-Level Pass (All Graded Outputs)** | 22 / 70 (31.43%) | 49 / 70 (70.00%) | **59 / 70 (84.29%)** | **▲ +10 cases (+14.29%)** |
 | **Decisions Correct** | 158 / 244 | 212 / 244 | **230 / 244** | **▲ +18 decisions** |
@@ -33,7 +33,7 @@ In a held-out **70-case / 244-decision benchmark**, Fine-Tuned Laya outperformed
 
 ### Reconciled Sub-Decision Breakdown
 
-| Decision Head | Number of Decisions | Base ModernBERT | TypeSafe Jev | Fine-Tuned Laya | Delta (Laya vs Jev) |
+| Decision Head | Number of Decisions | Base Laya | TypeSafe Jev | Fine-Tuned Laya | Delta (Laya vs Jev) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **`operation`** (7-way primitive action) | 70 | 61.4% (43/70) | 81.4% (57/70) | **100.0% (70/70)** | **▲ +13 decisions (+18.6%)** |
 | **`is_goal_satisfied`** (Noul verification) | 70 | 88.6% (62/70) | **100.0% (70/70)** | **100.0% (70/70)** | **Tied at parity (70/70)** |

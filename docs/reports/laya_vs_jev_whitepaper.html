@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Local Fine-Tuned Laya vs Jev Cloud API for Browser Automation: Can a 421M Parameter Fine-Tuned Model Compete?</title>
-  <meta name="description" content="A rigorous empirical benchmark, replication guide, and failure analysis of Base ModernBERT, TypeSafe Jev (Cloud System One API), and Fine-Tuned Laya Browser Agent on Mac Apple Silicon.">
+  <meta name="description" content="A rigorous empirical benchmark, replication guide, and failure analysis of Base Laya, TypeSafe Jev (Cloud System One API), and Fine-Tuned Laya Browser Agent on Mac Apple Silicon.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -544,7 +544,7 @@
           <thead>
             <tr>
               <th>Metric</th>
-              <th>Base ModernBERT (Zero-Shot)</th>
+              <th>Base Laya (Zero-Shot)</th>
               <th>TypeSafe Jev (jev-1.13.0 Live API)</th>
               <th>Fine-Tuned Laya (Mac MPS)</th>
               <th>Delta (Laya vs Jev)</th>
@@ -625,7 +625,7 @@
             <tr>
               <th>Decision Head</th>
               <th>Number of Decisions</th>
-              <th>Base ModernBERT</th>
+              <th>Base Laya</th>
               <th>TypeSafe Jev</th>
               <th>Fine-Tuned Laya</th>
               <th>Delta (Laya vs Jev)</th>
@@ -1162,7 +1162,7 @@ with urllib.request.urlopen(req, timeout=15) as resp:
       data: {
         labels: ['Hard Accuracy (Argmax)', 'Soft Accuracy (Agreement)'],
         datasets: [
-          { label: 'Base ModernBERT', data: [64.6, 54.2], backgroundColor: 'rgba(148, 163, 184, 0.5)', borderColor: '#94a3b8', borderWidth: 1 },
+          { label: 'Base Laya', data: [64.6, 54.2], backgroundColor: 'rgba(148, 163, 184, 0.5)', borderColor: '#94a3b8', borderWidth: 1 },
           { label: 'TypeSafe Jev (Cloud API)', data: [86.89, 71.03], backgroundColor: 'rgba(168, 85, 247, 0.65)', borderColor: '#a855f7', borderWidth: 1 },
           { label: 'Fine-Tuned Laya (Mac MPS)', data: [94.26, 76.66], backgroundColor: 'rgba(52, 211, 153, 0.75)', borderColor: '#34d399', borderWidth: 1 }
         ]
@@ -1182,7 +1182,7 @@ with urllib.request.urlopen(req, timeout=15) as resp:
     new Chart(document.getElementById('brierChart'), {
       type: 'bar',
       data: {
-        labels: ['TypeSafe Jev (Cloud)', 'Base ModernBERT', 'Fine-Tuned Laya (Mac MPS)'],
+        labels: ['TypeSafe Jev (Cloud)', 'Base Laya', 'Fine-Tuned Laya (Mac MPS)'],
         datasets: [{
           label: 'Brier Score (Lower is Better)',
           data: [0.1608, 0.1190, 0.0002],
@@ -1251,7 +1251,7 @@ with urllib.request.urlopen(req, timeout=15) as resp:
     new Chart(document.getElementById('eceChart'), {
       type: 'bar',
       data: {
-        labels: ['Base ModernBERT', 'TypeSafe Jev', 'Fine-Tuned Laya (Mac MPS)'],
+        labels: ['Base Laya', 'TypeSafe Jev', 'Fine-Tuned Laya (Mac MPS)'],
         datasets: [{
           label: 'Expected Calibration Error (ECE %)',
           data: [17.90, 7.66, 7.55],

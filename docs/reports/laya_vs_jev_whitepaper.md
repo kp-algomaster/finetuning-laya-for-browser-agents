@@ -20,7 +20,7 @@ This article details the benchmark results, evaluation methodology, failure case
 
 Authoritative performance across all 70 held-out test scenarios and 244 evaluated decisions:
 
-| Metric | Base ModernBERT (Zero-Shot) | TypeSafe Jev (`jev-1.13.0`) | Fine-Tuned Laya (Mac MPS) | Delta (Laya vs Jev) |
+| Metric | Base Laya (Zero-Shot) | TypeSafe Jev (`jev-1.13.0`) | Fine-Tuned Laya (Mac MPS) | Delta (Laya vs Jev) |
 | :--- | :---: | :---: | :---: | :---: |
 | **Offline Case-Level Pass (All Graded Outputs)** | 22 / 70 (31.43%) | 49 / 70 (70.00%) | **59 / 70 (84.29%)** | **▲ +10 cases (+14.29%)** |
 | **Decisions Correct** | 158 / 244 | 212 / 244 | **230 / 244** | **▲ +18 decisions** |
@@ -41,7 +41,7 @@ Authoritative performance across all 70 held-out test scenarios and 244 evaluate
 
 The 244 evaluated decisions span four distinct prediction heads. Ground-truth log reconciliation yields the following exact decision totals:
 
-| Decision Head | Number of Decisions | Base ModernBERT | TypeSafe Jev | Fine-Tuned Laya | Delta (Laya vs Jev) |
+| Decision Head | Number of Decisions | Base Laya | TypeSafe Jev | Fine-Tuned Laya | Delta (Laya vs Jev) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **`operation`** (7-way choice) | 70 | 61.4% (43/70) | 81.4% (57/70) | **100.0% (70/70)** | **▲ +13 decisions (+18.6%)** |
 | **`is_goal_satisfied`** (Noul verification) | 70 | 88.6% (62/70) | **100.0% (70/70)** | **100.0% (70/70)** | **Tied at parity (70/70)** |
